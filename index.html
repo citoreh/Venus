@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Venus Canon — Portrait Proportion Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f3ece0; --paper2:#ebe2d2; --card:#faf6ef; --ink:#2a2420; --ink2:#6d6258; --line:#d9cdb9;
+  --gold:#b0832f; --verm:#c0492f; --rose:#c98a7f;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--paper);color:var(--ink);font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:14px}
+header{padding:22px 28px 10px;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px}
+h1{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:34px;margin:0;letter-spacing:.3px}
+h1 em{color:var(--gold);font-style:italic;font-weight:500}
+.sub{color:var(--ink2);max-width:640px;margin:4px 0 0;line-height:1.45}
+.score{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 16px}
+.score .num{font-family:'Cormorant Garamond',serif;font-size:40px;line-height:1;font-weight:600}
+.score .lbl{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--ink2)}
+.score .verdict{font-size:13px}
+main{display:grid;grid-template-columns:minmax(320px,1.05fr) minmax(320px,1fr);gap:20px;padding:10px 28px 28px;align-items:start}
+@media (max-width:900px){main{grid-template-columns:1fr;padding:10px 14px 24px}header{padding:18px 14px 8px}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px}
+.stage{position:sticky;top:12px;padding:10px}
+@media (max-width:900px){.stage{position:static}}
+.stage svg{width:100%;height:auto;display:block;border-radius:10px}
+.overlaybar{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;padding:10px 6px 4px;font-size:13px}
+.overlaybar label{display:flex;gap:6px;align-items:center;cursor:pointer}
+.overlaybar input[type=range]{width:110px}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--ink2);padding:2px 6px 4px}
+.sw{display:inline-block;width:18px;height:0;border-top:2px dashed var(--gold);vertical-align:middle;margin-right:5px}
+.sw.r{border-top:2px solid var(--verm)}
+.panel{padding:6px 0}
+.master{padding:16px 18px;border-bottom:1px solid var(--line)}
+.master h2,.sec summary{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;margin:0}
+.master p{margin:4px 0 10px;color:var(--ink2);font-size:13px}
+.mrow{display:flex;align-items:center;gap:10px}
+.mrow span{font-size:12px;color:var(--ink2);white-space:nowrap}
+#master{flex:1;accent-color:var(--verm)}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+button{font:inherit;font-size:13px;border:1px solid var(--ink);background:transparent;color:var(--ink);border-radius:999px;padding:6px 14px;cursor:pointer}
+button:hover{background:var(--ink);color:var(--card)}
+button.primary{background:var(--ink);color:var(--card)}
+button.primary:hover{background:var(--verm);border-color:var(--verm)}
+.sec{border-bottom:1px solid var(--line);padding:12px 18px}
+.sec summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+.sec summary::-webkit-details-marker{display:none}
+.sec summary::after{content:'+';font-family:'IBM Plex Sans';font-size:18px;color:var(--ink2)}
+.sec[open] summary::after{content:'–'}
+.ctl{margin:12px 0 4px}
+.ctl .top{display:flex;justify-content:space-between;gap:8px;font-size:13px}
+.ctl .val{font-family:'IBM Plex Mono',monospace;font-size:12px}
+.ctl .val.off{color:var(--verm)}
+.ctl .ideal{font-size:11px;color:var(--ink2)}
+.track{position:relative}
+.track input{width:100%;accent-color:var(--ink);margin:6px 0 0}
+.track .mark{position:absolute;top:-1px;width:2px;height:9px;background:var(--gold);border-radius:1px;pointer-events:none}
+.prompt{margin-top:20px;padding:18px 20px;grid-column:1/-1}
+.prompt h2{font-family:'Cormorant Garamond',serif;font-size:26px;margin:0 0 4px}
+.prow{display:flex;flex-wrap:wrap;gap:12px;margin:10px 0}
+.prow label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--ink2)}
+select{font:inherit;font-size:13px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+textarea{width:100%;min-height:150px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;line-height:1.55;padding:12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);resize:vertical}
+#neg{min-height:56px}
+.copyrow{display:flex;justify-content:space-between;align-items:center;margin:12px 0 6px;gap:10px}
+.copyrow b{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--ink2);font-weight:600}
+.hidden{display:none}
+.metrics{display:grid;grid-template-columns:1fr auto;gap:2px 10px;font-size:12px;padding:10px 18px 16px}
+.metrics .bar{height:5px;background:var(--paper2);border-radius:3px;margin:5px 0 7px;grid-column:1/-1;overflow:hidden}
+.metrics .bar i{display:block;height:100%;background:var(--verm)}
+.refbox{border:1px dashed var(--line);border-radius:12px;padding:12px 14px;margin:12px 0 4px;background:#fffdf9}
+.refhead{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+.upl{position:relative;overflow:hidden;border:1px solid var(--ink);border-radius:999px;padding:6px 14px;cursor:pointer;font-size:13px}
+.upl:hover{background:var(--ink);color:var(--card)}
+.upl input{position:absolute;inset:0;opacity:0;cursor:pointer}
+#thumb{width:56px;height:56px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+.refopts{display:flex;flex-direction:column;gap:4px;font-size:13px}
+.refopts label{display:flex;gap:6px;align-items:center;cursor:pointer}
+.refopts input:disabled+*{opacity:.5}
+.align{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;margin-top:10px;font-size:12px;color:var(--ink2)}
+.align label{display:flex;gap:6px;align-items:center}
+.align input{width:120px}
+.hint{font-size:12px;color:var(--ink2);margin:4px 0}
+.toast{font-size:12px;color:var(--gold);min-height:16px}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Venus Canon <em>— portrait proportion studio</em></h1>
+    <p class="sub">An original portrait drawn on the classical canon of beauty: three equal facial thirds, a face five eye-widths across, a golden-ratio oval. Move one slider to shift every feature at once, or tune each detail and watch the Venus overlay show how far you've drifted.</p>
+  </div>
+  <div class="score card">
+    <div><div class="lbl">Venus harmony</div><div class="num" id="score">100</div></div>
+    <div class="verdict" id="verdict">Pure canon</div>
+  </div>
+</header>
+
+<main>
+  <section class="card stage">
+    <svg id="svg" viewBox="0 0 600 800" xmlns="http://www.w3.org/2000/svg" aria-label="Portrait drawing"></svg>
+    <div class="overlaybar">
+      <label><input type="checkbox" id="ovGrid" checked> Thirds &amp; fifths</label>
+      <label><input type="checkbox" id="ovGold" checked> Golden rectangle</label>
+      <label><input type="checkbox" id="ovGhost" checked> Venus ghost</label>
+      <label><input type="checkbox" id="ovDev" checked> Deviations</label>
+      <label>Overlay <input type="range" id="ovOp" min="0" max="1" step="0.05" value="0.85"></label>
+    </div>
+    <div class="legend"><span><i class="sw"></i>Venus ideal</span><span><i class="sw r"></i>Your portrait's deviation</span><span id="legendT" class="hidden"><i class="sw r" style="border-top-color:#e0583a"></i>Slider target shape on your photo</span></div>
+  </section>
+
+  <section class="card panel">
+    <div class="master">
+      <h2>Morph every detail</h2>
+      <p>One slider moves all features together, away from the canon in a chosen direction. Left and right push opposite ways.</p>
+      <div class="mrow"><span>← Variation A</span><input type="range" id="master" min="-100" max="100" value="0"><span>Variation B →</span></div>
+      <div class="btns">
+        <button class="primary" id="reset">Reset to Venus</button>
+        <button id="reroll">New morph direction</button>
+        <button id="random">Random face</button>
+      </div>
+    </div>
+    <div id="groups"></div>
+    <details class="sec"><summary>Deviation from canon</summary><div class="metrics" id="metrics"></div></details>
+  </section>
+
+  <section class="card prompt">
+    <h2>Text-to-image prompt</h2>
+    <p class="sub">Written live from the sliders. Choose a medium and the model you'll paste it into.</p>
+    <div class="refbox">
+      <div class="refhead">
+        <label class="upl"><input type="file" id="file" accept="image/*"><span id="uplTxt">Upload reference image</span></label>
+        <img id="thumb" class="hidden" alt="Uploaded reference">
+        <div class="refopts">
+          <label><input type="checkbox" id="imgMode" disabled> Apply settings to the uploaded image (edit prompt)</label>
+          <label><input type="checkbox" id="hairToo"> Change hair too</label>
+          <label><input type="checkbox" id="showPhoto" disabled> Show photo under the Venus overlay</label>
+        </div>
+        <button id="clearImg" class="hidden">Remove</button>
+      </div>
+      <div id="align" class="align hidden">
+        <span class="hint">Line the eyes and chin up with the gold guides:</span>
+        <label>Zoom <input type="range" id="pz" min="0.3" max="4" step="0.01" value="1"></label>
+        <label>Left / right <input type="range" id="px" min="-400" max="400" step="1" value="0"></label>
+        <label>Up / down <input type="range" id="py" min="-500" max="500" step="1" value="0"></label>
+        <label>Photo opacity <input type="range" id="po" min="0.2" max="1" step="0.05" value="1"></label>
+      </div>
+    </div>
+    <div class="prow">
+      <label>Medium<select id="medium">
+        <option value="keep" id="keepOpt" disabled>Keep the uploaded image's style</option>
+        <option value="graphite">Graphite &amp; red-chalk drawing</option>
+        <option value="tempera">Renaissance tempera painting</option>
+        <option value="photo">Photorealistic portrait</option>
+        <option value="marble">Marble bust</option>
+      </select></label>
+      <label>Hair colour<select id="hairColor">
+        <option value="strawberry-gold">Strawberry gold</option>
+        <option value="chestnut">Chestnut</option>
+        <option value="raven-black">Raven black</option>
+        <option value="platinum blonde">Platinum</option>
+      </select></label>
+      <label>Model format<select id="model">
+        <option value="natural">Nano Banana · GPT-Image · Flux (Kontext) · Imagen</option>
+        <option value="mj">Midjourney</option>
+        <option value="sd">Stable Diffusion / SDXL</option>
+      </select></label>
+    </div>
+    <p class="hint" id="modelHint"></p>
+    <div class="copyrow"><b>Prompt</b><span class="toast" id="toast"></span><button id="copy">Copy prompt</button></div>
+    <textarea id="out" readonly></textarea>
+    <div id="negWrap" class="hidden">
+      <div class="copyrow"><b>Negative prompt</b><button id="copyNeg">Copy negative</button></div>
+      <textarea id="neg" readonly></textarea>
+    </div>
+  </section>
+</main>
+
+<script>
+const PHI = 1.6180339887;
+const pct = v => (v*100).toFixed(1)+'%';
+const x2 = v => '×'+v.toFixed(2);
+const PARAMS = [
+  {k:'ratio', g:'Face structure', label:'Face length : width', min:1.3, max:1.95, ideal:PHI, step:0.005, fmt:v=>'1 : '+v.toFixed(3), canon:true},
+  {k:'upper', g:'Face structure', label:'Upper third (forehead)', min:0.27, max:0.40, ideal:1/3, step:0.002, fmt:pct, canon:true},
+  {k:'middle',g:'Face structure', label:'Middle third (nose length)', min:0.27, max:0.40, ideal:1/3, step:0.002, fmt:pct, canon:true},
+  {k:'cheek', g:'Face structure', label:'Cheekbone width', min:0.88, max:1.1, ideal:1, step:0.005, fmt:x2, canon:true},
+  {k:'jaw',   g:'Face structure', label:'Jaw width', min:0.6, max:0.95, ideal:0.76, step:0.005, fmt:x2, canon:true},
+  {k:'chin',  g:'Face structure', label:'Chin width', min:0.18, max:0.45, ideal:0.30, step:0.005, fmt:x2, canon:true},
+  {k:'eyeSize',g:'Eyes & brows', label:'Eye width (share of face)', min:0.16, max:0.25, ideal:0.2, step:0.001, fmt:v=>'1/'+(1/v).toFixed(2), canon:true},
+  {k:'eyeGap', g:'Eyes & brows', label:'Eye spacing (× eye width)', min:0.75, max:1.35, ideal:1, step:0.005, fmt:x2, canon:true},
+  {k:'eyeOpen',g:'Eyes & brows', label:'Eye openness', min:0.26, max:0.55, ideal:0.38, step:0.005, fmt:x2, canon:true},
+  {k:'eyeTilt',g:'Eyes & brows', label:'Canthal tilt', min:-8, max:14, ideal:4, step:0.5, fmt:v=>v.toFixed(1)+'°', canon:true},
+  {k:'browArch',g:'Eyes & brows', label:'Brow arch', min:0, max:1, ideal:0.5, step:0.01, fmt:pct, canon:true},
+  {k:'browWeight',g:'Eyes & brows', label:'Brow thickness', min:1.5, max:7, ideal:3.4, step:0.1, fmt:v=>v.toFixed(1)+'px', canon:true},
+  {k:'noseW', g:'Nose & mouth', label:'Nose width (× eye spacing)', min:0.75, max:1.4, ideal:1, step:0.005, fmt:x2, canon:true},
+  {k:'mouthW',g:'Nose & mouth', label:'Mouth width (× nose width)', min:1.2, max:2.1, ideal:PHI, step:0.005, fmt:x2, canon:true},
+  {k:'lipFull',g:'Nose & mouth', label:'Lip fullness', min:0.5, max:1.7, ideal:1, step:0.01, fmt:x2, canon:true},
+  {k:'lipRatio',g:'Nose & mouth', label:'Lower : upper lip', min:1, max:2.4, ideal:PHI, step:0.01, fmt:x2, canon:true},
+  {k:'mouthPos',g:'Nose & mouth', label:'Mouth height in lower third', min:0.22, max:0.45, ideal:1/3, step:0.002, fmt:pct, canon:true},
+  {k:'smile', g:'Nose & mouth', label:'Expression', min:-1, max:1, ideal:0.15, step:0.01, fmt:v=>v>0.4?'smile':v<-0.2?'melancholy':'serene', canon:false},
+  {k:'neck',  g:'Hair & neck', label:'Neck length', min:0.5, max:1.6, ideal:1.15, step:0.01, fmt:x2, canon:false},
+  {k:'hairLen',g:'Hair & neck', label:'Hair length', min:0, max:1, ideal:0.85, step:0.01, fmt:pct, canon:false},
+  {k:'hairVol',g:'Hair & neck', label:'Hair volume', min:0, max:1, ideal:0.6, step:0.01, fmt:pct, canon:false},
+  {k:'hairWave',g:'Hair & neck', label:'Hair wave', min:0, max:1, ideal:0.65, step:0.01, fmt:pct, canon:false},
+];
+const IDEAL = Object.fromEntries(PARAMS.map(p=>[p.k,p.ideal]));
+let P = {...IDEAL};
+let dir = {};
+const HAIR = {'strawberry-gold':['#c9935a','#7a4f2a'], 'chestnut':['#8a5a3b','#4a2e1e'], 'raven-black':['#3a3330','#141110'], 'platinum blonde':['#ddd0b0','#9a8a6a']};
+
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function rollDir(seed){const r=mulberry(seed);PARAMS.forEach(p=>dir[p.k]=(r()*2-1))}
+rollDir(7);
+
+/* ---------- UI build ---------- */
+const groupsEl=document.getElementById('groups');
+const ctlRefs={};
+[...new Set(PARAMS.map(p=>p.g))].forEach((g,i)=>{
+  const d=document.createElement('details'); d.className='sec'; if(i===0) d.open=true;
+  d.innerHTML=`<summary>${g}</summary>`;
+  PARAMS.filter(p=>p.g===g).forEach(p=>{
+    const c=document.createElement('div'); c.className='ctl';
+    const markPos=(p.ideal-p.min)/(p.max-p.min)*100;
+    c.innerHTML=`<div class="top"><span>${p.label}</span><span class="val"></span></div>
+      <div class="track"><span class="mark" style="left:calc(${markPos}% + ${8-markPos*0.16}px)"></span>
+      <input type="range" min="${p.min}" max="${p.max}" step="${p.step}" value="${p.ideal}"></div>
+      <div class="ideal">${p.canon?'Venus ideal':'Classical default'}: ${p.fmt(p.ideal)}</div>`;
+    const inp=c.querySelector('input');
+    inp.addEventListener('input',()=>{P[p.k]=+inp.value;render()});
+    ctlRefs[p.k]={inp,val:c.querySelector('.val')};
+    d.appendChild(c);
+  });
+  groupsEl.appendChild(d);
+});
+function syncControls(){PARAMS.forEach(p=>{ctlRefs[p.k].inp.value=P[p.k]})}
+
+const master=document.getElementById('master');
+master.addEventListener('input',()=>{applyMaster(+master.value/100)});
+function applyMaster(t){
+  PARAMS.forEach(p=>{const d=dir[p.k];const span=(d*t>0)?(p.max-p.ideal):(p.ideal-p.min);
+    P[p.k]=Math.min(p.max,Math.max(p.min,p.ideal+t*d*span));});
+  syncControls();render();
+}
+document.getElementById('reset').onclick=()=>{P={...IDEAL};master.value=0;syncControls();render()};
+document.getElementById('reroll').onclick=()=>{rollDir(Math.floor(Math.random()*1e9));applyMaster(+master.value/100||0)};
+document.getElementById('random').onclick=()=>{const r=mulberry(Math.floor(Math.random()*1e9));
+  PARAMS.forEach(p=>{const s=(r()*2-1)*0.75;const span=s>0?(p.max-p.ideal):(p.ideal-p.min);P[p.k]=p.ideal+s*span});
+  master.value=0;syncControls();render()};
+['ovGrid','ovGold','ovGhost','ovDev','ovOp','medium','hairColor','model','imgMode','hairToo','showPhoto','pz','px','py','po'].forEach(id=>document.getElementById(id).addEventListener('input',render));
+
+/* ---------- geometry ---------- */
+const CX=300;
+function geom(p){
+  const L=380,y0=200,W=L/p.ratio,h=W/2;
+  const browY=y0+p.upper*L, noseY=browY+p.middle*L, chinY=y0+L;
+  const skullTop=y0-0.215*L, eyeY=browY+0.062*L;
+  const ew=W*p.eyeSize, gap=ew*p.eyeGap, nw=gap*p.noseW, mw=nw*p.mouthW;
+  const mouthY=noseY+(chinY-noseY)*p.mouthPos;
+  return {L,y0,W,h,browY,noseY,chinY,skullTop,eyeY,ew,gap,nw,mw,mouthY};
+}
+const f=n=>n.toFixed(1);
+function closedCR(pts){
+  const n=pts.length;let d=`M${f(pts[0][0])} ${f(pts[0][1])}`;
+  for(let i=0;i<n;i++){const p0=pts[(i-1+n)%n],p1=pts[i],p2=pts[(i+1)%n],p3=pts[(i+2)%n];
+    d+=` C${f(p1[0]+(p2[0]-p0[0])/6)} ${f(p1[1]+(p2[1]-p0[1])/6)} ${f(p2[0]-(p3[0]-p1[0])/6)} ${f(p2[1]-(p3[1]-p1[1])/6)} ${f(p2[0])} ${f(p2[1])}`;}
+  return d+'Z';
+}
+function openCRSample(pts,per){
+  const out=[],n=pts.length;
+  for(let i=0;i<n-1;i++){const p0=pts[Math.max(0,i-1)],p1=pts[i],p2=pts[i+1],p3=pts[Math.min(n-1,i+2)];
+    for(let s=0;s<per;s++){const t=s/per,t2=t*t,t3=t2*t;
+      out.push([0,1].map(k=>0.5*((2*p1[k])+(-p0[k]+p2[k])*t+(2*p0[k]-5*p1[k]+4*p2[k]-p3[k])*t2+(-p0[k]+3*p1[k]-3*p2[k]+p3[k])*t3)));}}
+  out.push(pts[n-1]);return out;
+}
+function facePath(g,p){
+  const {h,L}=g;
+  const R=[[h*0.93,g.skullTop+0.07*L],[h*1.0,g.y0-0.02*L],[h*0.98,g.y0+0.12*L],[h*p.cheek,g.eyeY+0.06*L],
+    [h*(p.cheek*0.45+p.jaw*0.55),g.noseY+0.02*L],[h*p.jaw,g.noseY+0.58*(g.chinY-g.noseY)],[h*p.chin,g.chinY-0.04*L]];
+  const pts=[[0,g.skullTop],...R,[0,g.chinY],...R.slice().reverse().map(([x,y])=>[-x,y])].map(([x,y])=>[CX+x,y]);
+  return closedCR(pts);
+}
+function eyePaths(g,p,s){
+  const {ew,gap,eyeY}=g, eh=ew*p.eyeOpen*0.5*2*0.5*2/2*1.0*1; // half-height scale
+  const H=ew*p.eyeOpen*0.55;
+  const dt=ew*Math.tan(p.eyeTilt*Math.PI/180);
+  const ix=CX+s*gap/2, ox=CX+s*(gap/2+ew), iy=eyeY+dt/2, oy=eyeY-dt/2;
+  const upper=`M${f(ix)} ${f(iy)} C${f(ix+s*ew*0.2)} ${f(eyeY-H*0.95)} ${f(ix+s*ew*0.66)} ${f(eyeY-H*1.05-dt*0.25)} ${f(ox)} ${f(oy)}`;
+  const lower=`C${f(ox-s*ew*0.25)} ${f(eyeY+H*0.55-dt*0.2)} ${f(ix+s*ew*0.3)} ${f(eyeY+H*0.55)} ${f(ix)} ${f(iy)}`;
+  const crease=`M${f(ix+s*ew*0.12)} ${f(iy-H*0.7)} C${f(ix+s*ew*0.3)} ${f(eyeY-H*1.6)} ${f(ix+s*ew*0.75)} ${f(eyeY-H*1.6-dt*0.3)} ${f(ox+s*ew*0.02)} ${f(oy-H*0.45)}`;
+  const lowLine=`M${f(ox)} ${f(oy)} ${lower}`;
+  const icx=CX+s*(gap/2+ew*0.5), icy=eyeY+H*0.05-dt*0.0;
+  const r=Math.min(H*0.95,ew*0.23);
+  return {shape:upper+' '+lower+'Z',upper,lowLine,crease,icx,icy,r,ix,ox,iy,oy,H};
+}
+function browPath(g,p,s){
+  const {ew,gap,browY}=g, th=p.browWeight;
+  const ix=CX+s*(gap/2-ew*0.08), iy=browY+ew*0.05;
+  const pk=[CX+s*(gap/2+ew*0.72), browY-ew*(0.06+p.browArch*0.26)];
+  const tx=CX+s*(gap/2+ew*1.18), ty=browY+ew*0.08;
+  const ctl=(a,b)=>[2*pk[0]-(a[0]+b[0])/2,2*pk[1]-(a[1]+b[1])/2];
+  const top=ctl([ix,iy-th*0.6],[tx,ty]);
+  const bot=ctl([ix,iy+th*0.6],[tx,ty]);
+  return `M${f(ix)} ${f(iy-th*0.6)} Q${f(top[0])} ${f(top[1]-th*0.15)} ${f(tx)} ${f(ty)} Q${f(bot[0])} ${f(bot[1]+th*0.5)} ${f(ix)} ${f(iy+th*0.6)}Z`;
+}
+function mouthPaths(g,p){
+  const {mw,mouthY:my,ew}=g, ul=ew*0.19*p.lipFull, ll=ul*p.lipRatio*0.78;
+  const cy=my-p.smile*mw*0.07;
+  const Lc=[CX-mw/2,cy],Rc=[CX+mw/2,cy];
+  const upper=`M${f(Lc[0])} ${f(Lc[1])} C${f(CX-mw*0.32)} ${f(my-ul*0.45)} ${f(CX-mw*0.2)} ${f(my-ul*1.05)} ${f(CX-mw*0.1)} ${f(my-ul)} Q${f(CX-mw*0.04)} ${f(my-ul*0.95)} ${f(CX)} ${f(my-ul*0.72)} Q${f(CX+mw*0.04)} ${f(my-ul*0.95)} ${f(CX+mw*0.1)} ${f(my-ul)} C${f(CX+mw*0.2)} ${f(my-ul*1.05)} ${f(CX+mw*0.32)} ${f(my-ul*0.45)} ${f(Rc[0])} ${f(Rc[1])}`;
+  const stom=`C${f(CX+mw*0.22)} ${f(my+ul*0.12)} ${f(CX-mw*0.22)} ${f(my+ul*0.12)} ${f(Lc[0])} ${f(Lc[1])}`;
+  const stomLine=`M${f(Rc[0])} ${f(Rc[1])} ${stom}`;
+  const lower=`M${f(Rc[0])} ${f(Rc[1])} C${f(CX+mw*0.3)} ${f(my+ll*1.15)} ${f(CX-mw*0.3)} ${f(my+ll*1.15)} ${f(Lc[0])} ${f(Lc[1])} C${f(CX-mw*0.22)} ${f(my+ul*0.12)} ${f(CX+mw*0.22)} ${f(my+ul*0.12)} ${f(Rc[0])} ${f(Rc[1])}Z`;
+  return {upper:upper+' '+stom+'Z',lower,stomLine,ul,ll,my};
+}
+function nosePaths(g){
+  const {nw,noseY:y,gap,browY,eyeY,L}=g;
+  const ala=s=>`M${f(CX+s*nw*0.42)} ${f(y-nw*0.42)} C${f(CX+s*nw*0.62)} ${f(y-nw*0.12)} ${f(CX+s*nw*0.5)} ${f(y+nw*0.08)} ${f(CX+s*nw*0.24)} ${f(y+nw*0.02)}`;
+  const tip=`M${f(CX-nw*0.24)} ${f(y+nw*0.02)} Q${f(CX)} ${f(y+nw*0.16)} ${f(CX+nw*0.24)} ${f(y+nw*0.02)}`;
+  const bridge=`M${f(CX-gap*0.42)} ${f(browY+0.02*L)} C${f(CX-gap*0.3)} ${f(eyeY+12)} ${f(CX-nw*0.36)} ${f(y-0.11*L)} ${f(CX-nw*0.4)} ${f(y-nw*0.5)}`;
+  const bridgeR=`M${f(CX+gap*0.42)} ${f(browY+0.02*L)} C${f(CX+gap*0.3)} ${f(eyeY+12)} ${f(CX+nw*0.32)} ${f(y-0.11*L)} ${f(CX+nw*0.36)} ${f(y-nw*0.55)}`;
+  return {ala,tip,bridge,bridgeR};
+}
+
+/* ---------- drawing ---------- */
+function drawPortrait(g,p,hc){
+  const [hairLight,hairDark]=HAIR[hc];
+  const {h,L,y0,skullTop,chinY,noseY,browY}=g;
+  const vol=p.hairVol, endY=chinY-70+p.hairLen*250;
+  let s='';
+  // back hair mass
+  const bx1=h*1.28+vol*30, bx2=h*1.12+vol*55, bx3=h*0.98+vol*105+18;
+  s+=`<path d="M${CX} ${f(skullTop-14-vol*10)} C${f(CX+bx1)} ${f(skullTop-4)} ${f(CX+bx2)} ${f(y0+0.15*L)} ${f(CX+bx2)} ${f(chinY-40)} L${f(CX+bx3)} ${f(Math.max(endY,chinY-50)+18)} Q${CX} ${f(Math.max(endY,chinY-50)+60)} ${f(CX-bx3)} ${f(Math.max(endY,chinY-50)+18)} L${f(CX-bx2)} ${f(chinY-40)} C${f(CX-bx2)} ${f(y0+0.15*L)} ${f(CX-bx1)} ${f(skullTop-4)} ${CX} ${f(skullTop-14-vol*10)}Z" fill="url(#hairG)" opacity=".55"/>`;
+  // neck & shoulders
+  const nk=h*0.5, ny0=noseY+0.7*(chinY-noseY), shY=chinY+40+60*p.neck;
+  const body=`M${f(CX-nk)} ${f(ny0)} C${f(CX-nk*0.92)} ${f(shY-34)} ${f(CX-nk*1.0)} ${f(shY-10)} ${f(CX-nk*1.7)} ${f(shY+2)} C${f(CX-h*1.9)} ${f(shY+14)} ${f(CX-255)} ${f(shY+40)} ${f(CX-292)} 800 L${f(CX+292)} 800 C${f(CX+255)} ${f(shY+40)} ${f(CX+h*1.9)} ${f(shY+14)} ${f(CX+nk*1.7)} ${f(shY+2)} C${f(CX+nk*1.0)} ${f(shY-10)} ${f(CX+nk*0.92)} ${f(shY-34)} ${f(CX+nk)} ${f(ny0)}Z`;
+  s+=`<path d="${body}" fill="url(#skinBody)"/>`;
+  s+=`<ellipse cx="${CX}" cy="${f(chinY+14)}" rx="${f(h*0.6)}" ry="22" fill="#6b4d3a" opacity=".13" filter="url(#soft)"/>`;
+  s+=`<g fill="none" stroke="var(--ink)" stroke-linecap="round" filter="url(#pencil)">`;
+  [-1,1].forEach(sd=>{
+    s+=`<path d="M${f(CX+sd*nk)} ${f(ny0)} C${f(CX+sd*nk*0.92)} ${f(shY-34)} ${f(CX+sd*nk*1.0)} ${f(shY-10)} ${f(CX+sd*nk*1.7)} ${f(shY+2)} C${f(CX+sd*h*1.9)} ${f(shY+14)} ${f(CX+sd*255)} ${f(shY+40)} ${f(CX+sd*292)} 800" stroke-width="1.3" opacity=".75"/>`;
+    s+=`<path d="M${f(CX+sd*nk*0.35)} ${f(shY+30)} Q${f(CX+sd*nk*1.5)} ${f(shY+18)} ${f(CX+sd*nk*2.7)} ${f(shY+32)}" stroke-width="1" opacity=".35"/>`;
+  });
+  s+=`<path d="M${f(CX-8)} ${f(shY+26)} Q${CX} ${f(shY+34)} ${f(CX+8)} ${f(shY+26)}" stroke-width="1" opacity=".35"/></g>`;
+  // ears
+  [-1,1].forEach(sd=>{const x0=CX+sd*h*0.96, t=browY+0.015*L, b=noseY-0.01*L;
+    s+=`<path d="M${f(x0)} ${f(t+4)} C${f(x0+sd*h*0.2)} ${f(t-10)} ${f(x0+sd*h*0.24)} ${f(b-26)} ${f(x0+sd*h*0.05)} ${f(b)}" fill="url(#skin)" stroke="var(--ink)" stroke-width="1.2" opacity=".85" filter="url(#pencil)"/>`;
+    s+=`<path d="M${f(x0+sd*h*0.04)} ${f(t+10)} C${f(x0+sd*h*0.15)} ${f(t+2)} ${f(x0+sd*h*0.15)} ${f(b-30)} ${f(x0+sd*h*0.05)} ${f(b-14)}" fill="none" stroke="var(--ink)" stroke-width=".8" opacity=".4"/>`;
+  });
+  // face
+  const fp=facePath(g,p);
+  s+=`<path d="${fp}" fill="url(#skin)"/>`;
+  s+=`<clipPath id="faceClip"><path d="${fp}"/></clipPath>`;
+  s+=`<g clip-path="url(#faceClip)"><ellipse cx="${f(CX-h*0.55)}" cy="${f(g.eyeY+0.13*L)}" rx="${f(h*0.32)}" ry="${f(0.07*L)}" fill="#d98c80" opacity=".22" filter="url(#soft)"/><ellipse cx="${f(CX+h*0.55)}" cy="${f(g.eyeY+0.13*L)}" rx="${f(h*0.32)}" ry="${f(0.07*L)}" fill="#d98c80" opacity=".22" filter="url(#soft)"/>
+    <ellipse cx="${f(CX+h*0.95)}" cy="${f(g.noseY)}" rx="${f(h*0.28)}" ry="${f(0.3*L)}" fill="#7a5a44" opacity=".12" filter="url(#soft)"/></g>`;
+  s+=`<clipPath id="belowHair"><rect x="0" y="${f(y0+0.06*L)}" width="600" height="800"/></clipPath>`;
+  s+=`<path d="${fp}" fill="none" stroke="var(--ink)" stroke-width="1.5" filter="url(#pencil)" opacity=".9" clip-path="url(#belowHair)"/>`;
+  // features
+  s+=`<g filter="url(#pencil)" stroke-linecap="round" stroke-linejoin="round">`;
+  [-1,1].forEach(sd=>{
+    const e=eyePaths(g,p,sd);
+    s+=`<clipPath id="eyeClip${sd}"><path d="${e.shape}"/></clipPath>`;
+    s+=`<path d="${e.shape}" fill="#fbf7f1"/>`;
+    s+=`<g clip-path="url(#eyeClip${sd})"><circle cx="${f(e.icx)}" cy="${f(e.icy)}" r="${f(e.r)}" fill="#7a6650" stroke="#3a2e26" stroke-width="1"/><circle cx="${f(e.icx)}" cy="${f(e.icy)}" r="${f(e.r*0.42)}" fill="#1e1814"/><circle cx="${f(e.icx-e.r*0.35)}" cy="${f(e.icy-e.r*0.35)}" r="${f(e.r*0.2)}" fill="#fff" opacity=".9"/><path d="${e.upper}" fill="none" stroke="#3a2e26" stroke-width="${f(e.H*0.5)}" opacity=".18"/></g>`;
+    s+=`<path d="${e.upper}" fill="none" stroke="var(--ink)" stroke-width="2.1"/>`;
+    s+=`<path d="${e.lowLine}" fill="none" stroke="var(--ink)" stroke-width=".9" opacity=".55"/>`;
+    s+=`<path d="${e.crease}" fill="none" stroke="var(--ink)" stroke-width=".9" opacity=".45"/>`;
+    for(let i=0;i<5;i++){const t=0.55+i*0.1, x=e.ix+(e.ox-e.ix)*t, y=e.iy+(e.oy-e.iy)*t-e.H*(1-Math.pow(2*t-1,2))*0.95;
+      s+=`<path d="M${f(x)} ${f(y)} l${f(sd*(2+i*1.1))} ${f(-3-i*0.4)}" stroke="var(--ink)" stroke-width=".9" opacity=".7"/>`;}
+    s+=`<path d="${browPath(g,p,sd)}" fill="${hairDark}" opacity=".78"/>`;
+  });
+  const n=nosePaths(g);
+  s+=`<path d="${n.bridge}" fill="none" stroke="var(--ink)" stroke-width="1" opacity=".38"/><path d="${n.bridgeR}" fill="none" stroke="var(--ink)" stroke-width=".8" opacity=".14"/>`;
+  s+=`<path d="${n.ala(-1)}" fill="none" stroke="var(--ink)" stroke-width="1.3" opacity=".8"/><path d="${n.ala(1)}" fill="none" stroke="var(--ink)" stroke-width="1.3" opacity=".8"/><path d="${n.tip}" fill="none" stroke="var(--ink)" stroke-width="1" opacity=".55"/>`;
+  [-1,1].forEach(sd=>s+=`<ellipse cx="${f(CX+sd*g.nw*0.2)}" cy="${f(g.noseY-g.nw*0.01)}" rx="${f(g.nw*0.09)}" ry="${f(g.nw*0.045)}" fill="#3a2a22" opacity=".5"/>`);
+  const m=mouthPaths(g,p);
+  [-1,1].forEach(sd=>s+=`<path d="M${f(CX+sd*g.nw*0.12)} ${f(g.noseY+g.nw*0.14)} L${f(CX+sd*g.mw*0.1)} ${f(m.my-m.ul*1.05)}" stroke="var(--ink)" stroke-width=".7" opacity=".22"/>`);
+  s+=`<path d="${m.lower}" fill="${'#c98a7f'}" opacity=".78"/><path d="${m.upper}" fill="#b5716a" opacity=".85"/>`;
+  s+=`<path d="${m.lower}" fill="none" stroke="var(--ink)" stroke-width=".8" opacity=".35"/>`;
+  s+=`<path d="${m.stomLine}" fill="none" stroke="#3a2420" stroke-width="1.6"/>`;
+  s+=`<path d="M${f(CX-g.mw*0.18)} ${f(m.my+m.ll*1.25)} Q${CX} ${f(m.my+m.ll*1.6)} ${f(CX+g.mw*0.18)} ${f(m.my+m.ll*1.25)}" fill="none" stroke="var(--ink)" stroke-width=".8" opacity=".25"/>`;
+  s+=`</g>`;
+  // hair cap
+  const cap=`M${f(CX-h*0.99)} ${f(y0+0.15*L)} C${f(CX-h*0.88)} ${f(y0)} ${f(CX-h*0.4)} ${f(y0-0.035*L)} ${CX} ${f(y0)} C${f(CX+h*0.4)} ${f(y0-0.035*L)} ${f(CX+h*0.88)} ${f(y0)} ${f(CX+h*0.99)} ${f(y0+0.15*L)} C${f(CX+h*1.16+vol*12)} ${f(y0-0.08*L)} ${f(CX+h*0.85)} ${f(skullTop-10-vol*6)} ${CX} ${f(skullTop-12-vol*10)} C${f(CX-h*0.85)} ${f(skullTop-10-vol*6)} ${f(CX-h*1.16-vol*12)} ${f(y0-0.08*L)} ${f(CX-h*0.99)} ${f(y0+0.15*L)}Z`;
+  s+=`<path d="${cap}" fill="url(#hairG)" opacity=".9"/>`;
+  // strands
+  const r=mulberry(1234);
+  s+=`<g fill="none" stroke="${hairDark}" stroke-linecap="round" filter="url(#pencil)">`;
+  const HL=HAIR[hc][0];
+  [-1,1].forEach(sd=>{
+    for(let j=0;j<90;j++){ const hi=j%3===2;
+      const u=r(), q=r(), w=r(), ph=r()*6.28, short=r();
+      const P0=[CX+sd*(2+q*7), skullTop-4+q*10-vol*6];
+      const P1=[CX+sd*h*(0.42+0.32*u), skullTop+0.03*L+u*0.07*L-vol*6];
+      const P2=[CX+sd*(h*(0.99+0.06*u)+6+vol*20*u), y0+0.1*L+u*0.06*L];
+      const P3=[CX+sd*(h*1.0+10+vol*48*u), chinY-0.1*L];
+      const myEnd=endY+(w*50-25)-(short<0.25?short*160:0);
+      const P4=[CX+sd*(h*0.95+20+vol*100*u+q*18), myEnd];
+      let pts=[P0,P1,P2];
+      if(myEnd>P3[1]+25){pts.push(P3,P4)} else if(myEnd>P2[1]+25){pts.push([P2[0]+sd*vol*20*u,myEnd])}
+      const smp=openCRSample(pts,12), N=smp.length;
+      const amp=(14+26*u)*p.hairWave, k=2.6+w*1.6;
+      let d='';
+      smp.forEach((pt,i)=>{const tt=i/(N-1), env=Math.max(0,Math.min(1,(tt-0.22)/0.3));
+        const x=pt[0]+sd*Math.sin(tt*k*Math.PI+ph)*amp*env; d+=(i?' L':'M')+f(x)+' '+f(pt[1]);});
+      s+=hi?`<path d="${d}" stroke="${HL}" stroke-width="${f(0.8+u*1.4)}" opacity="${f(0.45+q*0.4)}"/>`:`<path d="${d}" stroke-width="${f(0.4+u*0.9)}" opacity="${f(0.22+q*0.45)}"/>`;
+    }
+  });
+  s+=`</g>`;
+  return s;
+}
+
+function drawOverlay(g,gi,p,opts,op){
+  let s=`<g opacity="${op}" font-family="IBM Plex Sans, sans-serif" font-size="10.5">`;
+  const gold='#b0832f', verm='#c0492f';
+  if(opts.grid){
+    const lines=[['crown',gi.skullTop],['hairline',gi.y0],['brow',gi.browY],['eyes',gi.eyeY],['nose base',gi.noseY],['mouth',gi.mouthY],['chin',gi.chinY]];
+    lines.forEach(([t,y])=>{s+=`<line x1="20" x2="580" y1="${f(y)}" y2="${f(y)}" stroke="${gold}" stroke-width=".9" stroke-dasharray="5 4"/>`;
+      s+=`<rect x="14" y="${f(y-15)}" width="${t.length*5.6+10}" height="13" rx="3" fill="#faf6ef" opacity=".85"/><text x="19" y="${f(y-5)}" fill="${gold}">${t}</text>`;});
+    // thirds bracket
+    const bx=560;[[gi.y0,gi.browY],[gi.browY,gi.noseY],[gi.noseY,gi.chinY]].forEach(([a,b])=>{
+      s+=`<path d="M${bx-5} ${f(a+2)} L${bx} ${f(a+2)} L${bx} ${f(b-2)} L${bx-5} ${f(b-2)}" fill="none" stroke="${gold}" stroke-width="1.2"/><text x="${bx+5}" y="${f((a+b)/2+4)}" fill="${gold}" font-size="13">⅓</text>`;});
+    // eye-line = half head
+    s+=`<path d="M40 ${f(gi.skullTop)} L40 ${f(gi.chinY)}" stroke="${gold}" stroke-width=".8" opacity=".6"/><text x="44" y="${f((gi.skullTop+gi.eyeY)/2)}" fill="${gold}">½</text><text x="44" y="${f((gi.eyeY+gi.chinY)/2+26)}" fill="${gold}">½</text>`;
+    // fifths
+    const e=gi.ew;[-2.5,-1.5,-0.5,0.5,1.5,2.5].forEach(k=>{const x=CX+k*e;
+      s+=`<line x1="${f(x)}" x2="${f(x)}" y1="${f(gi.y0-6)}" y2="${f(gi.chinY+10)}" stroke="${gold}" stroke-width=".7" stroke-dasharray="2 4"/>`;});
+    [-2,-1,0,1,2].forEach(k=>s+=`<text x="${f(CX+k*e-4)}" y="${f(gi.chinY+24)}" fill="${gold}" font-size="12">⅕</text>`);
+  }
+  if(opts.gold){
+    s+=`<rect x="${f(CX-gi.h)}" y="${f(gi.y0)}" width="${f(gi.W)}" height="${f(gi.L)}" fill="none" stroke="${gold}" stroke-width="1.3"/>`;
+    s+=`<line x1="${f(CX-gi.h)}" x2="${f(CX+gi.h)}" y1="${f(gi.y0+gi.W)}" y2="${f(gi.y0+gi.W)}" stroke="${gold}" stroke-width=".8"/>`;
+    const R=gi.W; // golden spiral arcs in square + remainder
+    s+=`<path d="M${f(CX-gi.h)} ${f(gi.y0+R)} A${f(R)} ${f(R)} 0 0 1 ${f(CX+gi.h)} ${f(gi.y0)}" fill="none" stroke="${gold}" stroke-width=".8" opacity=".7"/>`;
+    const r2=gi.L-gi.W;
+    s+=`<path d="M${f(CX+gi.h)} ${f(gi.y0+R)} A${f(r2)} ${f(r2)} 0 0 1 ${f(CX+gi.h-r2)} ${f(gi.y0+R+r2)}" fill="none" stroke="${gold}" stroke-width=".8" opacity=".7"/>`;
+    s+=`<text x="${f(CX-gi.h)}" y="${f(gi.y0-5)}" fill="${gold}">golden rectangle φ 1 : 1.618</text>`;
+  }
+  if(opts.ghost){
+    const pi={...p,...Object.fromEntries(PARAMS.filter(x=>x.canon).map(x=>[x.k,x.ideal]))};
+    s+=`<g fill="none" stroke="${gold}" stroke-width="1.4" stroke-dasharray="6 3">`;
+    s+=`<path d="${facePath(gi,pi)}"/>`;
+    [-1,1].forEach(sd=>{const e=eyePaths(gi,pi,sd);s+=`<path d="${e.shape}"/><path d="${browPath(gi,pi,sd)}" stroke-width="1"/>`;});
+    const n=nosePaths(gi);s+=`<path d="${n.ala(-1)}"/><path d="${n.ala(1)}"/><path d="${n.tip}"/>`;
+    const m=mouthPaths(gi,pi);s+=`<path d="${m.upper}"/><path d="${m.lower}"/>`;
+    s+=`</g>`;
+  }
+  if(opts.dev){
+    const pairs=[['brow',gi.browY,g.browY],['eyes',gi.eyeY,g.eyeY],['nose',gi.noseY,g.noseY],['mouth',gi.mouthY,g.mouthY]];
+    pairs.forEach(([t,a,b])=>{if(Math.abs(a-b)>1.5){
+      s+=`<line x1="${f(CX+g.h*0.2)}" x2="545" y1="${f(b)}" y2="${f(b)}" stroke="${verm}" stroke-width="1.1"/>`;
+      s+=`<path d="M535 ${f(a)} L535 ${f(b)}" stroke="${verm}" stroke-width="1.5" marker-end="url(#arr)"/>`;
+      s+=`<text x="492" y="${f(b+(b>a?13:-4))}" fill="${verm}">${b>a?'+':'−'}${(Math.abs(b-a)/gi.L*100).toFixed(1)}%</text>`;}});
+    // width
+    if(Math.abs(g.W-gi.W)>1.5){const y=gi.y0-0.17*gi.L+0;
+      s+=`<line x1="${f(CX-g.h)}" x2="${f(CX+g.h)}" y1="${f(gi.chinY+40)}" y2="${f(gi.chinY+40)}" stroke="${verm}" stroke-width="1.4"/>`;
+      s+=`<line x1="${f(CX-gi.h)}" x2="${f(CX+gi.h)}" y1="${f(gi.chinY+46)}" y2="${f(gi.chinY+46)}" stroke="${gold}" stroke-width="1.4" stroke-dasharray="5 3"/>`;
+      s+=`<text x="${f(CX+Math.max(g.h,gi.h)+8)}" y="${f(gi.chinY+46)}" fill="${verm}">width ${g.W>gi.W?'+':'−'}${(Math.abs(g.W-gi.W)/gi.W*100).toFixed(1)}%</text>`;}
+    // eye positions
+    [-1,1].forEach(sd=>{const e=eyePaths(g,p,sd);const ie=eyePaths(gi,{...p,...IDEALC()},sd);
+      if(Math.abs(e.icx-ie.icx)>1.5) s+=`<path d="M${f(ie.icx)} ${f(g.eyeY+22)} L${f(e.icx)} ${f(g.eyeY+22)}" stroke="${verm}" stroke-width="1.4" marker-end="url(#arr)"/>`;});
+  }
+  return s+'</g>';
+}
+function IDEALC(){return Object.fromEntries(PARAMS.filter(x=>x.canon).map(x=>[x.k,x.ideal]))}
+
+const DEFS=()=>{const [hl,hd]=HAIR[document.getElementById('hairColor').value];return `<defs>
+  <filter id="pencil" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="4" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.2" xChannelSelector="R" yChannelSelector="G"/></filter>
+  <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="9"/></filter>
+  <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="matrix" values="0 0 0 0 0.35  0 0 0 0 0.28  0 0 0 0 0.2  0 0 0 0.09 0"/></filter>
+  <radialGradient id="paperG" cx="50%" cy="40%" r="75%"><stop offset="0" stop-color="#f7f0e3"/><stop offset="1" stop-color="#e6d9c2"/></radialGradient>
+  <radialGradient id="skin" cx="45%" cy="40%" r="65%"><stop offset="0" stop-color="#f6e6d6"/><stop offset=".75" stop-color="#ecd3bd"/><stop offset="1" stop-color="#ddbfa5"/></radialGradient>
+  <linearGradient id="skinBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e6cbb3"/><stop offset=".3" stop-color="#f1dfcc"/><stop offset="1" stop-color="#ead5c0"/></linearGradient>
+  <linearGradient id="hairG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${hd}" stop-opacity=".75"/><stop offset=".35" stop-color="${hl}"/><stop offset="1" stop-color="${hl}" stop-opacity=".55"/></linearGradient>
+  <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10z" fill="#c0492f"/></marker>
+</defs>`};
+
+/* ---------- score + prompt ---------- */
+function devOf(p){const v=P[p.k];return Math.abs(v-p.ideal)/((v>p.ideal)?(p.max-p.ideal):(p.ideal-p.min)||1)}
+function scoreAll(){const c=PARAMS.filter(p=>p.canon);const m=c.reduce((a,p)=>a+devOf(p),0)/c.length;return Math.round(100*(1-Math.pow(m,0.85)))}
+
+function describe(){
+  const p=P, d=[], lower=1-p.upper-p.middle;
+  const face=[], eyes=[], brows=[], nose=[], mouth=[], hair=[];
+  face.push(p.ratio<1.48?'a rounder, broader face':p.ratio>1.76?'a long, narrow oval face':'a classic oval face in golden-ratio proportion');
+  if(p.upper>0.35)face.push('a high, smooth forehead');else if(p.upper<0.315)face.push('a low forehead');
+  if(p.middle>0.35)face.push('a long nose bridge');else if(p.middle<0.315)face.push('a short nose');
+  if(lower>0.36)face.push('a long lower face');else if(lower<0.30)face.push('a short lower face');
+  if(Math.abs(p.upper-1/3)<0.012&&Math.abs(p.middle-1/3)<0.012)face.push('forehead, nose and lower face in three equal thirds');
+  face.push(p.cheek>1.03?'high, prominent cheekbones':p.cheek<0.95?'soft, flat cheekbones':'gently sculpted cheekbones');
+  face.push(p.jaw>0.84?'a strong, square jawline':p.jaw<0.7?'a narrow, tapering jaw':'a softly tapered jawline');
+  face.push(p.chin>0.37?'a broad rounded chin':p.chin<0.24?'a small pointed chin':'a delicate rounded chin');
+  eyes.push(p.eyeSize>0.215?'large':p.eyeSize<0.185?'small':'almond-shaped');
+  if(p.eyeGap>1.1)eyes.push('wide-set');else if(p.eyeGap<0.9)eyes.push('close-set');
+  if(p.eyeOpen>0.45)eyes.push('wide-open');else if(p.eyeOpen<0.31)eyes.push('heavy-lidded, languid');
+  const tilt=p.eyeTilt>7?'with lifted, upturned outer corners':p.eyeTilt<1?'with gently downturned outer corners':'with a slight upward tilt';
+  brows.push(p.browWeight>5?'full, strong':p.browWeight<2.5?'fine, thin':'softly defined');
+  brows.push(p.browArch>0.7?'high-arched':p.browArch<0.3?'straight, low-arched':'gracefully arched');
+  nose.push(p.noseW>1.15?'a broad nose':p.noseW<0.88?'a narrow, refined nose':'a straight, slender nose');
+  mouth.push(p.mouthW>1.8?'a wide mouth':p.mouthW<1.45?'a small rosebud mouth':'a well-proportioned mouth');
+  mouth.push(p.lipFull>1.25?'full lips':p.lipFull<0.8?'thin lips':'softly full lips');
+  if(p.lipRatio>1.9)mouth.push('a noticeably fuller lower lip');else if(p.lipRatio<1.3)mouth.push('evenly balanced upper and lower lips');
+  const expr=p.smile>0.4?'a gentle, warm smile':p.smile<-0.2?'a melancholic, slightly downturned mouth':'the faint, enigmatic hint of a smile';
+  const hc=document.getElementById('hairColor').value;
+  const len=p.hairLen<0.25?'short, chin-length':p.hairLen<0.6?'shoulder-length':'very long, flowing';
+  const wave=p.hairWave>0.6?'wavy, wind-swept':p.hairWave<0.25?'straight, sleek':'softly waving';
+  const vol=p.hairVol>0.65?'voluminous ':p.hairVol<0.25?'close-lying ':'';
+  hair.push(`${len} ${vol}${wave} ${hc} hair with a centre parting`);
+  const neck=p.neck>1.25?'a long, slender swan neck':p.neck<0.8?'a short neck':'an elegant neck';
+  const sc=scoreAll();
+  const canon=sc>=85?'idealised classical "Venus" canon of beauty: equal facial thirds, a face five eye-widths wide, golden-ratio (1 : 1.618) proportions, perfect symmetry'
+    :sc>=60?'loosely classical "Venus" proportions with individual character'
+    :'distinctive, characterful proportions that depart from the classical ideal';
+  return {face,eyes:`${eyes.join(', ')} eyes ${tilt}`,brows:`${brows.join(', ')} eyebrows`,nose:nose[0],mouth:mouth.join(' and '),expr,hair:hair[0],neck,canon,sc};
+}
+const MEDIUM={
+  graphite:{lead:'fine graphite and red-chalk portrait drawing on warm cream paper',tail:'delicate cross-hatching, soft sfumato shading, Renaissance master study sheet, visible paper grain'},
+  tempera:{lead:'Early Italian Renaissance tempera painting on wooden panel',tail:'luminous pale porcelain skin, fine gold-leaf highlights in the hair, soft pastel sea-and-sky background, Quattrocento style, crackle varnish'},
+  photo:{lead:'photorealistic studio portrait photograph',tail:'85mm lens, soft north-window light, natural skin texture, shallow depth of field, neutral warm-grey backdrop'},
+  marble:{lead:'classical white Carrara marble portrait bust',tail:'polished stone surface, carved flowing hair, museum spotlight, dark background'}
+};
+function buildPrompt(){
+  const D=describe(), med=document.getElementById('medium').value, model=document.getElementById('model').value;
+  const imgOn=IMG.url&&document.getElementById('imgMode').checked;
+  const M=MEDIUM[med==='keep'?'graphite':med];
+  const neg='asymmetrical face, distorted or deformed features, extra eyes, cross-eyed, caricature, cartoon, text, watermark, signature, lowres, blurry, extra limbs';
+  let out='';
+  if(imgOn) return buildEditPrompt(D,med,model,neg);
+  if(model==='natural'){
+    out=`A ${M.lead}: a head-and-shoulders, front-facing portrait of an original young woman with a serene gaze toward the viewer. `+
+      `Her face follows ${D.sc>=85?'the ':''}${D.canon}. She has ${D.face.join(', ')}. `+
+      `${cap(D.eyes)}, ${D.brows}, ${D.nose} and ${D.mouth}, with ${D.expr}. `+
+      `${cap(D.hair)} frames her face and falls over bare shoulders; ${D.neck}. `+
+      `${cap(M.tail)}. Portrait orientation, 3:4.`;
+  } else {
+    const tags=[M.lead,'head-and-shoulders front-view portrait of an original young woman, serene gaze',D.canon,...D.face,D.eyes,D.brows,D.nose,D.mouth,D.expr,D.hair,D.neck,M.tail];
+    out=tags.join(', ');
+    if(model==='mj') out+=` --ar 3:4 --style raw --v 7 --no ${neg.split(', ').slice(0,6).join(', ')}`;
+  }
+  return {out,neg,model};
+}
+const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+function buildEditPrompt(D,med,model,neg){
+  const keep=med==='keep', M=MEDIUM[keep?'graphite':med], hairToo=document.getElementById('hairToo').checked;
+  const keepList=['identity and likeness','age','skin tone','head angle and pose',hairToo?null:'hair','clothing',keep?'background':null,'lighting','framing',keep?'original medium, colour palette and style':null].filter(Boolean);
+  const target=D.sc>=85?'the classical "Venus" canon of facial proportion (equal facial thirds, a face five eye-widths wide, golden-ratio 1 : 1.618 face, mouth 1.618 × nose width, symmetry)'
+    :D.sc>=60?'loosely classical "Venus" proportions with individual character':'distinctive proportions that depart from the classical ideal';
+  const feats=[...D.face,D.eyes,D.brows,D.nose,D.mouth,D.expr,D.neck];
+  if(hairToo) feats.push(D.hair.replace('with a centre parting','with a centre parting'));
+  const tail=M.tail.replace('luminous pale porcelain skin, ','luminous skin, ');
+  const restyle=keep?'':` Re-render the result as a ${M.lead}, ${tail}.`;
+  let out,hint;
+  if(model==='natural'){
+    out=`Edit the uploaded image. Keep the same person — preserve their ${keepList.join(', ')}. `+
+      `Change only the face so it follows ${target}: ${feats.join('; ')}.`+restyle+
+      ` The person must remain clearly recognisable; make the changes subtle, natural and seamless, with no other alterations.`;
+    hint='Attach your image to the model together with this prompt (works with Nano Banana, GPT-Image edits, Flux Kontext, Imagen edit).';
+  } else if(model==='mj'){
+    out=`<image URL> same person, ${keep?'same style and medium':M.lead}, face reshaped to ${target}, ${feats.join(', ')}${keep?'':', '+tail}, recognisable likeness --iw 2 --ar 3:4 --style raw --v 7 --no ${neg.split(', ').slice(0,6).join(', ')}`;
+    hint='Replace <image URL> with the link to your uploaded image (or use it in the Midjourney editor / as an Omni reference).';
+  } else {
+    out=[`same person as reference image`,keep?'same style':M.lead,`face reshaped to ${target}`,...feats,keep?null:tail,'recognisable likeness, natural, seamless'].filter(Boolean).join(', ');
+    hint='Use img2img or inpaint the face only, denoising strength about 0.35–0.5; add a face/identity adapter (IP-Adapter FaceID or InstantID) to keep the likeness.';
+  }
+  const n2=keep?neg.replace('caricature, cartoon, ',''):neg;
+  if(model==='mj') out=out.replace(neg.split(', ').slice(0,6).join(', '),n2.split(', ').slice(0,6).join(', '));
+  return {out,neg:n2+', different person, changed identity',model,hint};
+}
+/* ---------- uploaded image ---------- */
+const IMG={url:null,w:0,h:0};
+document.getElementById('file').addEventListener('change',e=>{
+  const fl=e.target.files&&e.target.files[0]; if(!fl) return;
+  if(IMG.url) URL.revokeObjectURL(IMG.url);
+  const url=URL.createObjectURL(fl), im=new Image();
+  im.onload=()=>{IMG.url=url;IMG.w=im.naturalWidth;IMG.h=im.naturalHeight;
+    const th=document.getElementById('thumb');th.src=url;th.classList.remove('hidden');
+    ['imgMode','showPhoto'].forEach(id=>{const c=document.getElementById(id);c.disabled=false;c.checked=true});
+    const ko=document.getElementById('keepOpt');ko.disabled=false;document.getElementById('medium').value='keep';
+    document.getElementById('clearImg').classList.remove('hidden');
+    document.getElementById('uplTxt').textContent='Replace image';
+    ['pz','px','py'].forEach((id,i)=>document.getElementById(id).value=[1,0,0][i]);
+    render();};
+  im.onerror=()=>{URL.revokeObjectURL(url);document.getElementById('uplTxt').textContent='Could not read that image — try another';};
+  im.src=url;
+});
+document.getElementById('clearImg').onclick=()=>{
+  if(IMG.url) URL.revokeObjectURL(IMG.url); IMG.url=null;
+  document.getElementById('file').value='';
+  document.getElementById('thumb').classList.add('hidden');
+  ['imgMode','showPhoto'].forEach(id=>{const c=document.getElementById(id);c.checked=false;c.disabled=true});
+  const ko=document.getElementById('keepOpt');ko.disabled=true;
+  if(document.getElementById('medium').value==='keep')document.getElementById('medium').value='graphite';
+  document.getElementById('clearImg').classList.add('hidden');
+  document.getElementById('uplTxt').textContent='Upload reference image';
+  render();
+};
+function drawPhoto(){
+  const z=+pz.value, fit=Math.max(600/IMG.w,800/IMG.h)*z, w=IMG.w*fit, h=IMG.h*fit;
+  const x=300-w/2+ +px.value, y=400-h/2+ +py.value;
+  return `<rect width="600" height="800" fill="#1d1916"/><image href="${IMG.url}" x="${f(x)}" y="${f(y)}" width="${f(w)}" height="${f(h)}" opacity="${po.value}" preserveAspectRatio="none"/>`;
+}
+function drawTarget(g,p){
+  let s=`<g fill="none" stroke="#e0583a" stroke-width="1.3" opacity=".9"><path d="${facePath(g,p)}"/>`;
+  [-1,1].forEach(sd=>{const e=eyePaths(g,p,sd);s+=`<path d="${e.shape}"/><path d="${browPath(g,p,sd)}"/>`;});
+  const n=nosePaths(g);s+=`<path d="${n.ala(-1)}"/><path d="${n.ala(1)}"/><path d="${n.tip}"/>`;
+  const m=mouthPaths(g,p);s+=`<path d="${m.upper}"/><path d="${m.lower}"/>`;
+  return s+'</g>';
+}
+
+/* ---------- render ---------- */
+const svg=document.getElementById('svg');
+function render(){
+  const hc=document.getElementById('hairColor').value;
+  const g=geom(P), gi=geom({...P,...IDEALC()});
+  const opts={grid:ovGrid.checked,gold:ovGold.checked,ghost:ovGhost.checked,dev:ovDev.checked};
+  const photo=IMG.url&&document.getElementById('showPhoto').checked;
+  document.getElementById('align').classList.toggle('hidden',!photo);
+  document.getElementById('legendT').classList.toggle('hidden',!photo);
+  svg.innerHTML=DEFS()+(photo?drawPhoto()+drawTarget(g,P):`<rect width="600" height="800" fill="url(#paperG)"/>`+drawPortrait(g,P,hc)+
+    `<rect width="600" height="800" filter="url(#grain)" pointer-events="none"/>`)+drawOverlay(g,gi,P,opts,+ovOp.value);
+  PARAMS.forEach(p=>{const r=ctlRefs[p.k];r.val.textContent=p.fmt(P[p.k]);r.val.classList.toggle('off',p.canon&&devOf(p)>0.05)});
+  const sc=scoreAll();
+  document.getElementById('score').textContent=sc;
+  document.getElementById('verdict').textContent=sc>=97?'Pure canon':sc>=85?'Near-ideal Venus':sc>=65?'Classical, with character':sc>=40?'Characterful':'Far from the canon';
+  const met=document.getElementById('metrics');
+  met.innerHTML=PARAMS.filter(p=>p.canon).map(p=>{const d=devOf(p);return `<span>${p.label}</span><span class="val">${p.fmt(P[p.k])} <span style="color:var(--ink2)">/ ${p.fmt(p.ideal)}</span></span><div class="bar"><i style="width:${(d*100).toFixed(0)}%"></i></div>`}).join('');
+  const pr=buildPrompt();
+  document.getElementById('out').value=pr.out;
+  document.getElementById('neg').value=pr.neg;
+  document.getElementById('negWrap').classList.toggle('hidden',pr.model!=='sd');
+  document.getElementById('modelHint').textContent=pr.hint||'';
+}
+function copy(id,msg){const t=document.getElementById(id).value;const toast=document.getElementById('toast');
+  (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>{toast.textContent=msg},()=>{const ta=document.getElementById(id);ta.select();toast.textContent='Selected — press Ctrl/Cmd+C'});
+  setTimeout(()=>toast.textContent='',2200);}
+document.getElementById('copy').onclick=()=>copy('out','Prompt copied');
+document.getElementById('copyNeg').onclick=()=>copy('neg','Negative prompt copied');
+const pz=document.getElementById('pz'),px=document.getElementById('px'),py=document.getElementById('py'),po=document.getElementById('po');
+const ovGrid=document.getElementById('ovGrid'),ovGold=document.getElementById('ovGold'),ovGhost=document.getElementById('ovGhost'),ovDev=document.getElementById('ovDev'),ovOp=document.getElementById('ovOp');
+render();
+</script>
+</body>
+</html>
